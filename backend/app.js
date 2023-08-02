@@ -9,9 +9,11 @@ const morgan = require("morgan");
 require("dotenv").config({ path: "../.env" });
 
 const User = require("./models/user");
+const Message = require("./models/message");
 
 const sequelize = require("./utils/database");
 const adminRoutes = require("./routes/admin");
+const messageRoutes = require("./routes/message");
 
 const app = express();
 
@@ -32,6 +34,10 @@ app.use(helmet());
 app.use(morgan("combined", { stream: accessLogStream }));
 
 app.use("/user", adminRoutes);
+app.use("/message", messageRoutes);
+
+User.hasMany(Message);
+Message.belongsTo(User);
 
 sequelize
     // .sync({ force: true })
