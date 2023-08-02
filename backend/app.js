@@ -20,7 +20,12 @@ const accessLogStream = fs.createWriteStream(
     { flags: "a" }
 );
 
-app.use(cors());
+app.use(
+    cors({
+        origin: "http://127.0.0.1:3001",
+        credentials: true,
+    })
+);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json({ extended: false }));
 app.use(helmet());

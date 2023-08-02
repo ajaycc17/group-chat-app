@@ -38,7 +38,7 @@ exports.signUp = async (req, res) => {
             });
         } else {
             res.status(403).json({
-                message: "User with this email id already exists!",
+                message: "User already exists, Please login!",
             });
         }
     } catch (err) {
