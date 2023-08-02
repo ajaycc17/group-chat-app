@@ -52,7 +52,7 @@ export default function Signup() {
                     Create your account
                 </h1>
                 <p className="text-center pb-3 text-lg border-b">
-                    Get smarter with a personalized insights
+                    Access the chat app
                 </p>
 
                 {visible && <Warning message={warning} />}
@@ -120,7 +120,7 @@ export default function Signup() {
                     </div>
                     <button
                         type="submit"
-                        className="text-white bg-gray-700 focus:outline-none font-medium w-full px-5 py-2.5 text-center mb-3 rounded-xl"
+                        className="text-white bg-black focus:outline-none font-medium w-full px-5 py-2.5 text-center mb-3 rounded-xl"
                     >
                         Sign up
                     </button>
