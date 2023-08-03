@@ -9,6 +9,10 @@ const GroupUser = sequelize.define("groupUser", {
         autoIncrement: true,
         primaryKey: true,
     },
+    admin: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+    },
 });
 
 module.exports = GroupUser;

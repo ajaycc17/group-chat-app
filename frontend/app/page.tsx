@@ -130,6 +130,40 @@ export default function Home() {
             console.log(err);
         }
     };
+    const revokeMemberSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        let myGrp = {
+            grpId: grpOId,
+            userId: userId,
+        };
+
+        // for server
+        let url = baseUrl + `/group/${grpId}/remove-user`;
+        try {
+            await axios.post(url, myGrp, {
+                headers: { Authorization: token },
+            });
+        } catch (err) {
+            console.log(err);
+        }
+    };
+    const makeAdmin = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        let myGrp = {
+            grpId: grpOId,
+            userId: userId,
+        };
+
+        // for server
+        let url = baseUrl + `/group/${grpId}/make-admin`;
+        try {
+            await axios.post(url, myGrp, {
+                headers: { Authorization: token },
+            });
+        } catch (err) {
+            console.log(err);
+        }
+    };
     return (
         <main className="px-2 md:px-4">
             <div className="max-w-6xl mx-auto grid grid-cols-12 gap-4">
@@ -193,6 +227,66 @@ export default function Home() {
                         />
                         <button type="submit" className="bg-black text-white">
                             Add
+                        </button>
+                    </form>
+
+                    {/* remove a user */}
+                    <form onSubmit={revokeMemberSubmit}>
+                        <h2>To remove a member:</h2>
+                        <input
+                            type="text"
+                            name="grpName"
+                            className="border"
+                            placeholder="Group Id"
+                            onChange={(
+                                event: React.ChangeEvent<HTMLInputElement>
+                            ) => {
+                                setGrpOId(event.target.value);
+                            }}
+                        />
+                        <input
+                            type="text"
+                            name="grpName"
+                            className="border"
+                            placeholder="User id"
+                            onChange={(
+                                event: React.ChangeEvent<HTMLInputElement>
+                            ) => {
+                                setUserId(event.target.value);
+                            }}
+                        />
+                        <button type="submit" className="bg-black text-white">
+                            Remove
+                        </button>
+                    </form>
+
+                    {/* make admin */}
+                    <form onSubmit={makeAdmin}>
+                        <h2>To make a member admin:</h2>
+                        <input
+                            type="text"
+                            name="grpName"
+                            className="border"
+                            placeholder="Group Id"
+                            onChange={(
+                                event: React.ChangeEvent<HTMLInputElement>
+                            ) => {
+                                setGrpOId(event.target.value);
+                            }}
+                        />
+                        <input
+                            type="text"
+                            name="grpName"
+                            className="border"
+                            placeholder="User id"
+                            onChange={(
+                                event: React.ChangeEvent<HTMLInputElement>
+                            ) => {
+                                setUserId(event.target.value);
+                            }}
+                        />
+                        <button type="submit" className="bg-black text-white">
+                            Make Admin
                         </button>
                     </form>
                 </div>
