@@ -4,53 +4,74 @@ import axios from "axios";
 import AllGrps from "./components/AllGrps";
 import Chat from "./components/Chat";
 
-const dataArr: (string | null)[] = [];
+let grpId = 0;
 
 export default function Home() {
-    const [message, setMessage] = useState("");
-    const [effectLogic, setEffectLogic] = useState(false);
-    let lastIdNum = 0;
-    if (localStorage.getItem(String(0)) !== null) {
-        const theData = JSON.parse(localStorage.getItem(String(0))!);
-        lastIdNum = theData.id;
-    }
-    const [lastId, setLastId] = useState(lastIdNum);
-    const [messData, setMessData] = useState([] as (string | null)[]);
+    const [grp, setGrps] = useState([]);
+    const [grpFetch, setGrpFetch] = useState(false);
+    const [grpName, setGrpName] = useState("");
+    const [grpOId, setGrpOId] = useState("");
+    const [userId, setUserId] = useState("");
+
+    const [messages, setMessages] = useState([]);
+
+    const [sendMsg, setSendMsg] = useState("");
+
     let baseUrl = "http://localhost:3000";
+    const token = localStorage.getItem("token");
 
     // only on initial render
     useEffect(() => {
-        if (localStorage.getItem(String(0)) !== null) {
-            for (let i = 0; i < 10; i++) {
-                dataArr.push(JSON.parse(localStorage.getItem(String(i))!));
-            }
-        }
+        // update every second
+        setInterval(() => {
+            handleExpandGrp();
+            setGrpFetch(!grpFetch);
+        }, 1000);
     }, []);
 
-    // every second check
-    // useEffect(() => {
-    //     const token = localStorage.getItem("token");
-    //     // get expense and downloadeds data together
-    //     let url = baseUrl + `/message?last=${lastId}`;
-    //     axios
-    //         .get(url, {
-    //             headers: { Authorization: token },
-    //         })
-    //         .then((res) => res.data)
-    //         .then((data) => {
-    //             const limit = data.length > 10 ? 10 : data.length;
-    //             for (let i = 0; i < limit; i++) {
-    //                 localStorage.setItem(String(i), JSON.stringify(data[i]));
-    //                 dataArr[i] = data[i];
-    //             }
-    //         })
-    //         .catch((err) => console.log(err));
-    // }, [effectLogic]);
+    // only on initial render
+    useEffect(() => {
+        let url = baseUrl + "/message";
+        axios
+            .get(url, {
+                headers: { Authorization: token },
+            })
+            .then((res) => res.data.data)
+            .then((data) => {
+                setGrps(data);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }, [grpFetch]);
 
-    // update every second
-    setInterval(() => {
-        setEffectLogic(!effectLogic);
-    }, 1000);
+    // set grpId
+    var customSetGrpId = function (id: number) {
+        return new Promise(function (resolve, reject) {
+            try {
+                grpId = id;
+                resolve("Id updated!");
+            } catch (err) {
+                reject(Error("It broke"));
+            }
+        });
+    };
+
+    // fetch the messages of a particular group
+    const handleExpandGrp = () => {
+        let url = baseUrl + `/message/${grpId}`;
+        axios
+            .get(url, {
+                headers: { Authorization: token },
+            })
+            .then((res) => res.data)
+            .then((data) => {
+                setMessages(data);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    };
 
     // handle message submission
     const handleSubmit = (event: React.ChangeEvent<HTMLFormElement>) => {
@@ -61,32 +82,138 @@ export default function Home() {
         axios
             .post(
                 url,
-                { message: message },
+                { message: sendMsg, grpId: grpId },
                 {
                     headers: { Authorization: token },
                 }
             )
             .then(() => {
-                setMessage("");
-                setEffectLogic(!effectLogic);
+                setSendMsg("");
+                handleExpandGrp();
             })
             .catch((err) => {
                 console.log(err);
             });
     };
+
+    const handleGrpSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        let myGrp = {
+            grpName: grpName,
+            desc: "New Group",
+        };
+
+        // for server
+        let url = baseUrl + "/group/add";
+        try {
+            const res = await axios.post(url, myGrp, {
+                headers: { Authorization: token },
+            });
+        } catch (err) {
+            console.log(err);
+        }
+    };
+    const handleMemberSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        let myGrp = {
+            grpId: grpOId,
+            userId: userId,
+        };
+
+        // for server
+        let url = baseUrl + `/group/${grpId}/add-user`;
+        try {
+            await axios.post(url, myGrp, {
+                headers: { Authorization: token },
+            });
+        } catch (err) {
+            console.log(err);
+        }
+    };
     return (
         <main className="px-2 md:px-4">
             <div className="max-w-6xl mx-auto grid grid-cols-12 gap-4">
-                <div className="col-span-4 h-[calc(100vh-87px)] flex flex-col gap-3 py-4">
-                    <AllGrps />
-                    <AllGrps />
-                    <AllGrps />
+                <div className="col-span-4 h-[calc(100vh-87px)] flex flex-col gap-3 py-4 overflow-y-scroll">
+                    {grp.map(
+                        (grpItem: {
+                            id: number;
+                            name: string;
+                            description: string;
+                        }) => (
+                            <AllGrps
+                                name={grpItem.name}
+                                desc={grpItem.description}
+                                id={grpItem.id}
+                                handleExpandGrp={handleExpandGrp}
+                                customSetGrpId={customSetGrpId}
+                                key={"grp" + grpItem.id}
+                            />
+                        )
+                    )}
+                    <form onSubmit={handleGrpSubmit}>
+                        <input
+                            type="text"
+                            name="grpName"
+                            className="border"
+                            placeholder="Group Name"
+                            onChange={(
+                                event: React.ChangeEvent<HTMLInputElement>
+                            ) => {
+                                setGrpName(event.target.value);
+                            }}
+                        />
+                        <button type="submit" className="bg-black text-white">
+                            Create
+                        </button>
+                    </form>
+
+                    {/* add members */}
+                    <form onSubmit={handleMemberSubmit}>
+                        <input
+                            type="text"
+                            name="grpName"
+                            className="border"
+                            placeholder="Group Id"
+                            onChange={(
+                                event: React.ChangeEvent<HTMLInputElement>
+                            ) => {
+                                setGrpOId(event.target.value);
+                            }}
+                        />
+                        <input
+                            type="text"
+                            name="grpName"
+                            className="border"
+                            placeholder="User id"
+                            onChange={(
+                                event: React.ChangeEvent<HTMLInputElement>
+                            ) => {
+                                setUserId(event.target.value);
+                            }}
+                        />
+                        <button type="submit" className="bg-black text-white">
+                            Add
+                        </button>
+                    </form>
                 </div>
                 <div className="col-span-8 py-4 h-[calc(100vh-87px)]">
                     <div className="chat-body rounded-t-xl p-4 relative h-[calc(100%-4.4rem)] flex flex-col-reverse gap-2 overflow-y-scroll">
-                        {dataArr.map((messItem: any) => {
-                            return <Chat data={messItem.content} />;
-                        })}
+                        {messages.map(
+                            (messItem: {
+                                id: number;
+                                userId: number;
+                                content: string;
+                                createdAt: string;
+                            }) => {
+                                return (
+                                    <Chat
+                                        message={messItem.content}
+                                        userId={messItem.userId}
+                                        key={"mess" + messItem.id}
+                                    />
+                                );
+                            }
+                        )}
                     </div>
                     {/* message sending form */}
                     <form
@@ -98,10 +225,10 @@ export default function Home() {
                             name="message"
                             className="w-full rounded-md text-sm py-2 px-3 border focus:outline-none"
                             placeholder="Your message"
-                            value={message}
+                            value={sendMsg}
                             onChange={(
                                 event: React.ChangeEvent<HTMLInputElement>
-                            ) => setMessage(event.target.value)}
+                            ) => setSendMsg(event.target.value)}
                         />
                         <button
                             type="submit"

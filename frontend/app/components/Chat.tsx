@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-export default function Chat(props: { data: string }) {
+export default function Chat(props: { message: string; userId: number }) {
     return (
         <div className="flex items-end gap-2">
             <div>
@@ -14,9 +14,9 @@ export default function Chat(props: { data: string }) {
             </div>
             <div className="flex flex-col rounded-e-3xl rounded-tl-3xl py-4 px-5 backdrop-blur-sm bg-gray-400/30">
                 <span className="font-medium text-sm text-gray-500">
-                    Ajay Choudhury &middot; 19:45 PM
+                    {props.userId} &middot; 19:45 PM
                 </span>
-                <span className="">{props.data}</span>
+                <span className="">{props.message}</span>
             </div>
         </div>
     );

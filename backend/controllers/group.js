@@ -2,6 +2,7 @@ const Group = require("../models/group");
 const Message = require("../models/message");
 const user = require("../models/user");
 
+// create new group and add the admin as a group member
 exports.newGrp = async (req, res, next) => {
     const name = req.body.grpName;
     const desc = req.body.desc;
@@ -24,6 +25,7 @@ exports.newGrp = async (req, res, next) => {
     }
 };
 
+// add new member to the group only if you are an admin
 exports.addUser = async (req, res, next) => {
     const grpId = req.body.grpId;
     const userId = req.body.userId;
