@@ -10,10 +10,13 @@ require("dotenv").config({ path: "../.env" });
 
 const User = require("./models/user");
 const Message = require("./models/message");
+const Group = require("./models/group");
+const GroupUser = require("./models/groupUser");
 
 const sequelize = require("./utils/database");
 const adminRoutes = require("./routes/admin");
 const messageRoutes = require("./routes/message");
+const grpRoutes = require("./routes/group");
 
 const app = express();
 
@@ -35,9 +38,19 @@ app.use(morgan("combined", { stream: accessLogStream }));
 
 app.use("/user", adminRoutes);
 app.use("/message", messageRoutes);
+app.use("/group", grpRoutes);
 
+// user to meesage relation
 User.hasMany(Message);
 Message.belongsTo(User);
+
+// message to group relation
+Group.hasMany(Message);
+Message.belongsTo(Group);
+
+// many to many relation of members and group
+User.belongsToMany(Group, { through: GroupUser });
+Group.belongsToMany(User, { through: GroupUser });
 
 sequelize
     // .sync({ force: true })

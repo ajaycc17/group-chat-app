@@ -28,24 +28,24 @@ export default function Home() {
     }, []);
 
     // every second check
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-        // get expense and downloadeds data together
-        let url = baseUrl + `/message?last=${lastId}`;
-        axios
-            .get(url, {
-                headers: { Authorization: token },
-            })
-            .then((res) => res.data)
-            .then((data) => {
-                const limit = data.length > 10 ? 10 : data.length;
-                for (let i = 0; i < limit; i++) {
-                    localStorage.setItem(String(i), JSON.stringify(data[i]));
-                    dataArr[i] = data[i];
-                }
-            })
-            .catch((err) => console.log(err));
-    }, [effectLogic]);
+    // useEffect(() => {
+    //     const token = localStorage.getItem("token");
+    //     // get expense and downloadeds data together
+    //     let url = baseUrl + `/message?last=${lastId}`;
+    //     axios
+    //         .get(url, {
+    //             headers: { Authorization: token },
+    //         })
+    //         .then((res) => res.data)
+    //         .then((data) => {
+    //             const limit = data.length > 10 ? 10 : data.length;
+    //             for (let i = 0; i < limit; i++) {
+    //                 localStorage.setItem(String(i), JSON.stringify(data[i]));
+    //                 dataArr[i] = data[i];
+    //             }
+    //         })
+    //         .catch((err) => console.log(err));
+    // }, [effectLogic]);
 
     // update every second
     setInterval(() => {
