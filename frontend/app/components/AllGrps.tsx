@@ -9,7 +9,7 @@ export default function AllGrps(props: {
 }) {
     return (
         <div
-            className="p-3 flex items-center justify-between gap-2 bg-gray-100 rounded-xl"
+            className="p-3 flex items-center justify-between gap-2 bg-gray-700 rounded-xl cursor-pointer"
             onClick={() => {
                 props
                     .customSetGrpId(props.id)
@@ -25,15 +25,17 @@ export default function AllGrps(props: {
                     width={42}
                     height={42}
                     alt="User"
-                    className="bg-gray-300 rounded-full p-1"
+                    className="bg-gray-400 rounded-full p-1"
                 />
                 <div className="flex flex-col">
                     <span className="font-medium">{props.name}</span>
-                    <span className="text-xs mt-[-3px]">{props.desc}</span>
+                    <span className="text-xs mt-[-3px] text-gray-300">
+                        {props.desc}
+                    </span>
                 </div>
             </div>
             <div className="py-0.5 px-2 bg-black text-xs text-white rounded-xl">
-                {props.id}
+                ID : {props.id}
             </div>
         </div>
     );

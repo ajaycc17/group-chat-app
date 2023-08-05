@@ -1,4 +1,6 @@
 const express = require("express");
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
 
 const messageController = require("../controllers/message");
 const userAuthMiddleware = require("../middleware/auth");
@@ -20,6 +22,13 @@ router.post(
     "/add",
     userAuthMiddleware.authenticate,
     messageController.postMessage
+);
+
+// add new multimedia to a specific group
+router.post(
+    "/add-media",
+    [userAuthMiddleware.authenticate, upload.single("file")],
+    messageController.postMedia
 );
 
 module.exports = router;

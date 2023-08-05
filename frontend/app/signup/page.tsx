@@ -14,7 +14,7 @@ export default function Signup() {
     const [visible, setVisible] = useState(false);
     const [warning, setWarning] = useState("");
 
-    const baseUrl = "http://localhost:3000";
+    const baseUrl = "https://api.codeplasma.tech";
     const router = useRouter();
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -47,11 +47,11 @@ export default function Signup() {
     };
     return (
         <div className="min-h-[calc(100vh-116px)] flex items-center px-2 md:px-4">
-            <section className="w-full md:max-w-md mx-auto my-8 bg-white p-6 rounded-2xl">
-                <h1 className="font-head font-semibold mb-1 text-center text-2xl md:text-3xl">
+            <section className="w-full md:max-w-md mx-auto my-8 bg-gray-700 p-6 rounded-2xl">
+                <h1 className="font-head font-semibold mb-1 text-center text-xl md:text-2xl">
                     Create your account
                 </h1>
-                <p className="text-center pb-3 text-lg border-b">
+                <p className="text-center pb-3 border-b border-gray-500 text-gray-300">
                     Access the chat app
                 </p>
 
@@ -63,7 +63,7 @@ export default function Signup() {
                             type="text"
                             id="username"
                             name="username"
-                            className="bg-gray-50 border rounded-xl block w-full p-2.5 focus:outline-none"
+                            className="bg-gray-800 rounded-xl block w-full p-2.5 focus:outline-none"
                             required
                             placeholder="Your name"
                             onChange={(
@@ -78,7 +78,7 @@ export default function Signup() {
                             type="email"
                             id="email"
                             name="email"
-                            className="bg-gray-50 border rounded-xl block w-full p-2.5 focus:outline-none"
+                            className="bg-gray-800 rounded-xl block w-full p-2.5 focus:outline-none"
                             required
                             placeholder="Your email"
                             onChange={(
@@ -93,7 +93,7 @@ export default function Signup() {
                             type="tel"
                             id="phone"
                             name="phone"
-                            className="bg-gray-50 border rounded-xl block w-full p-2.5 focus:outline-none"
+                            className="bg-gray-800 rounded-xl block w-full p-2.5 focus:outline-none"
                             placeholder="Phone"
                             required
                             onChange={(
@@ -108,7 +108,7 @@ export default function Signup() {
                             type="password"
                             id="password1"
                             name="password1"
-                            className="bg-gray-50 border rounded-xl block w-full p-2.5 focus:outline-none"
+                            className="bg-gray-800 rounded-xl block w-full p-2.5 focus:outline-none"
                             required
                             placeholder="Password"
                             onChange={(
@@ -120,13 +120,13 @@ export default function Signup() {
                     </div>
                     <button
                         type="submit"
-                        className="text-white bg-black focus:outline-none font-medium w-full px-5 py-2.5 text-center mb-3 rounded-xl"
+                        className="text-white bg-green-800 focus:outline-none font-medium w-full px-5 py-2.5 text-center mb-3 rounded-xl"
                     >
                         Sign up
                     </button>
                     <p>
                         Already have an account?{" "}
-                        <Link href="/login" className="text-blue-700">
+                        <Link href="/login" className="text-blue-300">
                             Log in
                         </Link>
                         .

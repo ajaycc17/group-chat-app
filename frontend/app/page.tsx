@@ -1,36 +1,64 @@
 "use client";
-import { useState, useEffect } from "react";
 import axios from "axios";
+import io from "socket.io-client";
+import Image from "next/image";
+import { useState, useEffect } from "react";
+
 import AllGrps from "./components/AllGrps";
-import Chat from "./components/Chat";
+import MakeAdmin from "./components/MakeAdmin";
+import RemoveUser from "./components/RemoveUser";
+import AddMember from "./components/AddMember";
+import NewGroup from "./components/NewGroup";
+import ChatSection from "./components/ChatSection";
 
 let grpId = 0;
+let socket: any;
 
 export default function Home() {
+    // fetech all groups user is in
     const [grp, setGrps] = useState([]);
-    const [grpFetch, setGrpFetch] = useState(false);
-    const [grpName, setGrpName] = useState("");
-    const [grpOId, setGrpOId] = useState("");
-    const [userId, setUserId] = useState("");
 
     const [messages, setMessages] = useState([]);
+    const [arrivalMessage, setArrivalMessage] = useState(null);
 
-    const [sendMsg, setSendMsg] = useState("");
+    const [arrivalGrps, setArrivalGrps] = useState([]);
 
-    let baseUrl = "http://localhost:3000";
-    const token = localStorage.getItem("token");
+    let baseUrl = "https://api.codeplasma.tech";
 
-    // only on initial render
+    // one time only
     useEffect(() => {
-        // update every second
-        setInterval(() => {
-            handleExpandGrp();
-            setGrpFetch(!grpFetch);
-        }, 1000);
+        const token = localStorage.getItem("token");
+        socket = io(baseUrl, {
+            query: { token },
+        });
+        // send my user ID
+        socket.emit("online", localStorage.getItem("userId"));
+
+        // listen for the group updates
+        socket.on("grpData", (grpData: any) => {
+            setArrivalGrps(grpData);
+        });
+
+        // lissten for incoming mesages in group
+        socket.on("room message", (msg: never) => {
+            setArrivalMessage(msg);
+        });
     }, []);
 
+    // update messages only when new message arrives
+    useEffect(() => {
+        arrivalMessage &&
+            setMessages((prev) => [arrivalMessage, ...prev] as never);
+    }, [arrivalMessage]);
+
+    // update groups only when new groups arrives
+    useEffect(() => {
+        arrivalGrps && setGrps([...arrivalGrps]);
+    }, [arrivalGrps]);
+
     // only on initial render
     useEffect(() => {
+        const token = localStorage.getItem("token");
         let url = baseUrl + "/message";
         axios
             .get(url, {
@@ -43,13 +71,14 @@ export default function Home() {
             .catch((err) => {
                 console.log(err);
             });
-    }, [grpFetch]);
+    }, []);
 
     // set grpId
     var customSetGrpId = function (id: number) {
         return new Promise(function (resolve, reject) {
             try {
                 grpId = id;
+                socket.emit("join", grpId);
                 resolve("Id updated!");
             } catch (err) {
                 reject(Error("It broke"));
@@ -59,6 +88,7 @@ export default function Home() {
 
     // fetch the messages of a particular group
     const handleExpandGrp = () => {
+        const token = localStorage.getItem("token");
         let url = baseUrl + `/message/${grpId}`;
         axios
             .get(url, {
@@ -72,102 +102,14 @@ export default function Home() {
                 console.log(err);
             });
     };
-
-    // handle message submission
-    const handleSubmit = (event: React.ChangeEvent<HTMLFormElement>) => {
-        event.preventDefault();
-
-        let url = baseUrl + "/message/add";
-        const token = localStorage.getItem("token");
-        axios
-            .post(
-                url,
-                { message: sendMsg, grpId: grpId },
-                {
-                    headers: { Authorization: token },
-                }
-            )
-            .then(() => {
-                setSendMsg("");
-                handleExpandGrp();
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-    };
-
-    const handleGrpSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        let myGrp = {
-            grpName: grpName,
-            desc: "New Group",
-        };
-
-        // for server
-        let url = baseUrl + "/group/add";
-        try {
-            const res = await axios.post(url, myGrp, {
-                headers: { Authorization: token },
-            });
-        } catch (err) {
-            console.log(err);
-        }
-    };
-    const handleMemberSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        let myGrp = {
-            grpId: grpOId,
-            userId: userId,
-        };
-
-        // for server
-        let url = baseUrl + `/group/${grpId}/add-user`;
-        try {
-            await axios.post(url, myGrp, {
-                headers: { Authorization: token },
-            });
-        } catch (err) {
-            console.log(err);
-        }
-    };
-    const revokeMemberSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        let myGrp = {
-            grpId: grpOId,
-            userId: userId,
-        };
-
-        // for server
-        let url = baseUrl + `/group/${grpId}/remove-user`;
-        try {
-            await axios.post(url, myGrp, {
-                headers: { Authorization: token },
-            });
-        } catch (err) {
-            console.log(err);
-        }
-    };
-    const makeAdmin = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        let myGrp = {
-            grpId: grpOId,
-            userId: userId,
-        };
-
-        // for server
-        let url = baseUrl + `/group/${grpId}/make-admin`;
-        try {
-            await axios.post(url, myGrp, {
-                headers: { Authorization: token },
-            });
-        } catch (err) {
-            console.log(err);
-        }
-    };
     return (
         <main className="px-2 md:px-4">
-            <div className="max-w-6xl mx-auto grid grid-cols-12 gap-4">
-                <div className="col-span-4 h-[calc(100vh-87px)] flex flex-col gap-3 py-4 overflow-y-scroll">
+            <div className="max-w-8xl mx-auto grid grid-cols-12 gap-4">
+                {/* show all groups user is in */}
+                <div
+                    id="groupBar"
+                    className="col-span-12 xl:col-span-3 h-[calc(100vh-87px)] hidden xl:flex flex-col gap-3 py-4 overflow-y-scroll"
+                >
                     {grp.map(
                         (grpItem: {
                             id: number;
@@ -184,153 +126,50 @@ export default function Home() {
                             />
                         )
                     )}
-                    <form onSubmit={handleGrpSubmit}>
-                        <input
-                            type="text"
-                            name="grpName"
-                            className="border"
-                            placeholder="Group Name"
-                            onChange={(
-                                event: React.ChangeEvent<HTMLInputElement>
-                            ) => {
-                                setGrpName(event.target.value);
-                            }}
-                        />
-                        <button type="submit" className="bg-black text-white">
-                            Create
-                        </button>
-                    </form>
-
-                    {/* add members */}
-                    <form onSubmit={handleMemberSubmit}>
-                        <input
-                            type="text"
-                            name="grpName"
-                            className="border"
-                            placeholder="Group Id"
-                            onChange={(
-                                event: React.ChangeEvent<HTMLInputElement>
-                            ) => {
-                                setGrpOId(event.target.value);
-                            }}
-                        />
-                        <input
-                            type="text"
-                            name="grpName"
-                            className="border"
-                            placeholder="User id"
-                            onChange={(
-                                event: React.ChangeEvent<HTMLInputElement>
-                            ) => {
-                                setUserId(event.target.value);
-                            }}
-                        />
-                        <button type="submit" className="bg-black text-white">
-                            Add
-                        </button>
-                    </form>
-
-                    {/* remove a user */}
-                    <form onSubmit={revokeMemberSubmit}>
-                        <h2>To remove a member:</h2>
-                        <input
-                            type="text"
-                            name="grpName"
-                            className="border"
-                            placeholder="Group Id"
-                            onChange={(
-                                event: React.ChangeEvent<HTMLInputElement>
-                            ) => {
-                                setGrpOId(event.target.value);
-                            }}
-                        />
-                        <input
-                            type="text"
-                            name="grpName"
-                            className="border"
-                            placeholder="User id"
-                            onChange={(
-                                event: React.ChangeEvent<HTMLInputElement>
-                            ) => {
-                                setUserId(event.target.value);
-                            }}
-                        />
-                        <button type="submit" className="bg-black text-white">
-                            Remove
-                        </button>
-                    </form>
-
-                    {/* make admin */}
-                    <form onSubmit={makeAdmin}>
-                        <h2>To make a member admin:</h2>
-                        <input
-                            type="text"
-                            name="grpName"
-                            className="border"
-                            placeholder="Group Id"
-                            onChange={(
-                                event: React.ChangeEvent<HTMLInputElement>
-                            ) => {
-                                setGrpOId(event.target.value);
-                            }}
-                        />
-                        <input
-                            type="text"
-                            name="grpName"
-                            className="border"
-                            placeholder="User id"
-                            onChange={(
-                                event: React.ChangeEvent<HTMLInputElement>
-                            ) => {
-                                setUserId(event.target.value);
-                            }}
-                        />
-                        <button type="submit" className="bg-black text-white">
-                            Make Admin
-                        </button>
-                    </form>
                 </div>
-                <div className="col-span-8 py-4 h-[calc(100vh-87px)]">
-                    <div className="chat-body rounded-t-xl p-4 relative h-[calc(100%-4.4rem)] flex flex-col-reverse gap-2 overflow-y-scroll">
-                        {messages.map(
-                            (messItem: {
-                                id: number;
-                                userId: number;
-                                content: string;
-                                createdAt: string;
-                            }) => {
-                                return (
-                                    <Chat
-                                        message={messItem.content}
-                                        userId={messItem.userId}
-                                        key={"mess" + messItem.id}
-                                    />
-                                );
-                            }
-                        )}
-                    </div>
-                    {/* message sending form */}
-                    <form
-                        className="flex items-center gap-2 backdrop-blur-md bg-gray-300/30 p-4 rounded-b-xl"
-                        onSubmit={handleSubmit}
-                    >
-                        <input
-                            type="text"
-                            name="message"
-                            className="w-full rounded-md text-sm py-2 px-3 border focus:outline-none"
-                            placeholder="Your message"
-                            value={sendMsg}
-                            onChange={(
-                                event: React.ChangeEvent<HTMLInputElement>
-                            ) => setSendMsg(event.target.value)}
+                {/* the chat section */}
+                <div
+                    id="chatBar"
+                    className="col-span-12 xl:col-span-6 py-4 h-[calc(100vh-87px)]"
+                >
+                    {grpId !== 0 ? (
+                        <ChatSection
+                            messages={messages}
+                            handleExpandGrp={handleExpandGrp}
+                            grpId={grpId}
+                            socket={socket}
                         />
-                        <button
-                            type="submit"
-                            className="bg-green-700 text-white text-sm py-2 px-3 rounded-md"
-                        >
-                            Send
-                        </button>
-                    </form>
+                    ) : (
+                        <div className="bg-gray-800 rounded-xl p-4 h-full flex flex-col gap-2 items-center justify-center">
+                            <Image
+                                src="/no-chat.svg"
+                                width={60}
+                                height={60}
+                                alt="Open a group"
+                                className="bg-gray-300 rounded-full p-2"
+                            />
+                            <h2 className="font-semibold text-xl text-gray-500 text-center">
+                                Open a group to send messages
+                            </h2>
+                        </div>
+                    )}
+                </div>
+                {/* contains some forms for admin */}
+                <div
+                    id="adminBar"
+                    className="col-span-12 xl:col-span-3 h-[calc(100vh-87px)] hidden xl:flex flex-col gap-3 py-4 overflow-y-scroll"
+                >
+                    <h2 className="text-lg font-semibold pb-1 mb-1 border-b">
+                        Admin Actions:
+                    </h2>
+                    {/* to create new group */}
+                    <NewGroup />
+                    {/* add members */}
+                    <AddMember currGrp={grpId} socket={socket} />
+                    {/* remove a user */}
+                    <RemoveUser currGrp={grpId} />
+                    {/* make admin */}
+                    <MakeAdmin currGrp={grpId} />
                 </div>
             </div>
         </main>

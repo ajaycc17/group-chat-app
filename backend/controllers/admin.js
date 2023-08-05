@@ -67,6 +67,7 @@ exports.logIn = async (req, res) => {
                             user.id,
                             user.name
                         ),
+                        userId: user.id,
                     });
                 } else {
                     return res.status(401).json({
