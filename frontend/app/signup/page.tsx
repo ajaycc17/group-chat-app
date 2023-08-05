@@ -14,7 +14,7 @@ export default function Signup() {
     const [visible, setVisible] = useState(false);
     const [warning, setWarning] = useState("");
 
-    const baseUrl = "https://api.codeplasma.tech";
+    const baseUrl = "http://localhost:3000";
     const router = useRouter();
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

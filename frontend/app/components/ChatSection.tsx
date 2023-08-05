@@ -4,7 +4,7 @@ import Chat from "./Chat";
 import ChatMine from "./ChatMine";
 import { RiAttachmentLine } from "react-icons/ri";
 
-const baseUrl = "https://api.codeplasma.tech";
+const baseUrl = "http://localhost:3000";
 
 export default function ChatSection(props: {
     messages: never[];

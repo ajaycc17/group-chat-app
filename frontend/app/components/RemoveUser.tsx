@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 
-const baseUrl = "https://api.codeplasma.tech";
+const baseUrl = "http://localhost:3000";
 
 export default function RemoveUser(props: { currGrp: number }) {
     const [groupId, setGroupId] = useState("");

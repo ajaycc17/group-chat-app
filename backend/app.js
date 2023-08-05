@@ -122,6 +122,10 @@ io.use(function (socket, next) {
     });
 });
 
+// cron job
+const cronTask = require("./utils/cronJob");
+cronTask.job.start();
+
 sequelize
     // .sync({ force: true })
     .sync()

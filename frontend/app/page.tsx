@@ -23,7 +23,7 @@ export default function Home() {
 
     const [arrivalGrps, setArrivalGrps] = useState([]);
 
-    let baseUrl = "https://api.codeplasma.tech";
+    let baseUrl = "http://localhost:3000";
 
     // one time only
     useEffect(() => {
