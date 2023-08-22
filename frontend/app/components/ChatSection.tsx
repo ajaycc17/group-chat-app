@@ -190,48 +190,8 @@ export default function ChatSection(props: {
                     }
                 )}
             </div>
-            <form
-                className="flex items-center gap-2 bg-gray-700 p-4 rounded-b-xl border-t-2 border-gray-900"
-                onSubmit={handleSubmit}
-            >
-                <div className="flex w-full">
-                    <input
-                        type="text"
-                        className="w-full rounded-s-xl text-sm py-2 px-3 bg-gray-800 placeholder:text-gray-400 focus:outline-none"
-                        placeholder="Your message"
-                        value={sendMsg}
-                        onChange={(
-                            event: React.ChangeEvent<HTMLInputElement>
-                        ) => setSendMsg(event.target.value)}
-                    />
-                    <label
-                        htmlFor="inpFile"
-                        className="rounded-e-xl bg-gray-800 py-2 px-3 text-lg border-s-2 border-gray-700"
-                    >
-                        <RiAttachmentLine />
-                    </label>
-                    <input
-                        type="file"
-                        id="inpFile"
-                        name="inpFile"
-                        ref={fileInp}
-                        className="hidden"
-                        onChange={(
-                            event: React.ChangeEvent<HTMLInputElement>
-                        ) => {
-                            if (event.target.files) {
-                                setSendFile(event.target.files[0]);
-                            }
-                        }}
-                    />
-                </div>
-                <button
-                    type="submit"
-                    className="bg-green-700 text-white font-medium text-sm py-2 px-3 rounded-xl"
-                >
-                    Send
-                </button>
-            </form>
+            
+            
         </div>
     );
 }
